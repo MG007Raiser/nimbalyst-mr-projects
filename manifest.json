@@ -1,7 +1,7 @@
 {
   "id": "com.fireworklabs.project-theme",
   "name": "Mr. Projects",
-  "version": "0.5.1",
+  "version": "0.5.2",
   "description": "Uniquify project spaces–designed to work with Mr. Themes. A per-project theme, a richer left rail with icons, names, drag-and-drop order and dividers, and a project poster banner docked in the left column with an optional Sandboxed chip and an Open in Finder button.",
   "author": "Firework Labs",
   "main": "dist/index.js",
