@@ -246,7 +246,11 @@ function SettingsBody({ path }: { path: string }) {
         </div>
         <div className="pt-frow">
           <label>Tile letters <Faint>(up to 3; empty uses the initials)</Faint></label>
-          <input className="pt-input" style={{ width: 80 }} value={look.tileLetters} placeholder={initialsOf(name)} maxLength={3} onChange={(e) => update({ tileLetters: e.target.value })} />
+          <input className="pt-input" style={{ width: 80 }} value={look.tileLetters} placeholder={initialsOf(name)} maxLength={3} onChange={(e) => {
+            // Typing letters on a poster or image tile means they should show, so switch the overlay on with them.
+            const tileLetters = e.target.value;
+            update(look.icon.kind !== 'initials' && tileLetters.trim() ? { tileLetters, icon: { ...look.icon, letters: true } } : { tileLetters });
+          }} />
         </div>
         <div className="pt-frow">
           <label>Tile icon</label>
