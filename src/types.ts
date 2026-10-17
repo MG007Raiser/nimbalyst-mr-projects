@@ -34,9 +34,10 @@ export type IconSpec = { kind: 'initials' } | { kind: 'poster'; letters?: boolea
 
 export type TileSpec = { kind: 'solid'; color: string } | { kind: 'gradient'; from: string; to: string; angle: number };
 
-/** The short-name overlay on the poster. Always shown, always bottom-left, in the palette's text color. */
+/** The short-name overlay on the poster. Always shown along the bottom, in the palette's text color. */
 export interface TitleSpec {
-  size: 'S' | 'M' | 'L';
+  size: 'S' | 'M' | 'L' | 'XL';
+  align: 'left' | 'center' | 'right';
 }
 
 /** A Hero Patterns tile drawn over the base color. */
@@ -100,7 +101,7 @@ export function defaultLook(): ProjectLook {
       shape: 'wave',
       palette: { primary: DEFAULT_PRIMARY, accent: DEFAULT_ACCENT, text: DEFAULT_TEXT },
       pattern: { id: 'topography', scale: 1, opacity: 0.35 },
-      title: { size: 'L' },
+      title: { size: 'L', align: 'left' },
       sandboxed: false,
       openFolderButton: false,
     },
@@ -187,7 +188,10 @@ export function normalizeLook(input: unknown): ProjectLook {
         scale: num(pattern.scale, d.poster.pattern.scale, 0.5, 3),
         opacity: num(pattern.opacity, d.poster.pattern.opacity, 0.05, 1),
       },
-      title: { size: title.size === 'S' || title.size === 'M' ? title.size : 'L' },
+      title: {
+        size: title.size === 'S' || title.size === 'M' || title.size === 'XL' ? title.size : 'L',
+        align: title.align === 'center' || title.align === 'right' ? title.align : 'left',
+      },
       sandboxed: bool(poster.sandboxed, false),
       openFolderButton: bool(poster.openFolderButton, false),
     },

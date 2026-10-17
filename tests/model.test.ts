@@ -68,6 +68,15 @@ assert.ok(sized('small').includes('viewBox="0 0 400 90"') && sized('small').incl
 assert.ok(sized('small').includes('translate(0 -310)'));
 assert.ok(posterSvg({ ...sample.poster, size: 'small' }, { noTitle: true }).includes('viewBox="0 0 400 400"')); ok('banner SVG height, title size and padding follow the size; square is unaffected');
 
+// ---- short name: XL size and left / center / right alignment
+assert.deepEqual(sample.poster.title, { size: 'L', align: 'left' });
+assert.deepEqual(normalizeLook({ poster: { title: { size: 'XL', align: 'center' } } }).poster.title, { size: 'XL', align: 'center' });
+assert.equal(normalizeLook({ poster: { title: { align: 'middle' } } }).poster.title.align, 'left');
+const titled = (align: 'left' | 'center' | 'right') => posterSvg({ ...sample.poster, title: { size: 'XL', align } }, { title: 'Sandbox', aspect: 'banner' });
+assert.ok(titled('left').includes('text-anchor="start"') && titled('left').includes('<tspan x="24"') && titled('left').includes('font-size="48"'));
+assert.ok(titled('center').includes('text-anchor="middle"') && titled('center').includes('<tspan x="200"'));
+assert.ok(titled('right').includes('text-anchor="end"') && titled('right').includes('<tspan x="376"')); ok('short name XL and alignment');
+
 // ---- wrapTitle: at most two lines, break after hyphens or at spaces, ellipsis on overflow
 assert.deepEqual(wrapTitle('Sandbox', 40, 352), ['Sandbox']);
 assert.deepEqual(wrapTitle('UX-review-checklist', 40, 352), ['UX-review-', 'checklist']);

@@ -84,7 +84,7 @@ function shapePath(shape: ShapeId): { d: string; shadow: boolean } {
 }
 
 function titleFont(size: TitleSpec['size']): number {
-  return size === 'S' ? 26 : size === 'M' ? 36 : 48;
+  return size === 'S' ? 26 : size === 'M' ? 36 : size === 'XL' ? 60 : 48;
 }
 
 /** Approximate advance width of heavy system text, in em, good enough to decide line breaks. */
@@ -175,8 +175,10 @@ export function posterSvg(spec: PosterSpec, opts: PosterRenderOptions = {}): str
     const lines = wrapTitle(label, fs, W - pad * 2);
     const lineHeight = Math.round(fs * 1.02);
     const baseline = H - pad;
-    const tspans = lines.map((line, idx) => `<tspan x="${pad}" y="${baseline - (lines.length - 1 - idx) * lineHeight}">${esc(line)}</tspan>`).join('');
-    text = `<text text-anchor="start" font-family="-apple-system, 'SF Pro Display', Inter, system-ui, sans-serif" font-size="${fs}" font-weight="800" letter-spacing="-0.02em" fill="${palette.text}" style="${shadow}">${tspans}</text>`;
+    const x = title.align === 'center' ? W / 2 : title.align === 'right' ? W - pad : pad;
+    const anchor = title.align === 'center' ? 'middle' : title.align === 'right' ? 'end' : 'start';
+    const tspans = lines.map((line, idx) => `<tspan x="${x}" y="${baseline - (lines.length - 1 - idx) * lineHeight}">${esc(line)}</tspan>`).join('');
+    text = `<text text-anchor="${anchor}" font-family="-apple-system, 'SF Pro Display', Inter, system-ui, sans-serif" font-size="${fs}" font-weight="800" letter-spacing="-0.02em" fill="${palette.text}" style="${shadow}">${tspans}</text>`;
   }
 
   return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${W} ${H}" width="${W}" height="${H}" preserveAspectRatio="xMidYMid slice"><defs>${defs}</defs>${body}${text}</svg>`;

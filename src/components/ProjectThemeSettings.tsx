@@ -423,8 +423,11 @@ function SettingsBody({ path }: { path: string }) {
                   </div>
                 ) : null}
                 <div className="pt-frow">
-                  <label>Short name size <Faint>(bottom-left, in the palette's text color)</Faint></label>
-                  <Seg value={look.poster.title.size} options={[['S', 'S'], ['M', 'M'], ['L', 'L']]} onChange={(s) => updatePoster({ title: { size: s } })} />
+                  <label>Short name <Faint>(along the bottom, in the palette's text color)</Faint></label>
+                  <span style={{ display: 'flex', gap: 8, alignItems: 'center', flexWrap: 'wrap' }}>
+                    <Seg value={look.poster.title.size} options={[['S', 'S'], ['M', 'M'], ['L', 'L'], ['XL', 'XL']]} onChange={(s) => updatePoster({ title: { ...look.poster.title, size: s } })} />
+                    <Seg value={look.poster.title.align} options={[['left', 'Left'], ['center', 'Center'], ['right', 'Right']]} onChange={(a) => updatePoster({ title: { ...look.poster.title, align: a } })} />
+                  </span>
                 </div>
               </>
             ) : null}
