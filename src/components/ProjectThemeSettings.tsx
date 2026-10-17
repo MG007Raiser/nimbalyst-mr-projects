@@ -3,7 +3,7 @@
  */
 import { useEffect, useMemo, useState } from 'react';
 import type { SettingsPanelProps } from '@nimbalyst/extension-sdk';
-import { HERO_PATTERNS, PALETTES, SHAPES, fileUrl, posterDataUri, posterSvg, resolveProjectPath, samePalette, shapeName } from '../poster';
+import { HERO_PATTERNS, PALETTES, SHAPES, fileUrl, posterDataUri, posterSvg, randomPalette, resolveProjectPath, samePalette, shapeName } from '../poster';
 import { heroPatternById } from '../heroPatterns';
 import {
   deletePalette, getBridge, getExtensionContext, getLook, getRailLayout, getSavedPalettes, getRailSize, openFolderLabel, refreshFromDisk, savePalette, setLookInCache, setRailLayout, setRailSize, subscribe,
@@ -390,6 +390,7 @@ function SettingsBody({ path }: { path: string }) {
               <>
                 <div className="pt-frow">
                   <label>Palette <Faint>(primary base, accent figure, text overlay)</Faint></label>
+                  <button type="button" className="pt-btn" title="Make a new random palette; click again for another" onClick={() => pickPalette(randomPalette())}>Auto generate</button>
                 </div>
                 <div className="pt-pals">
                   {PALETTES.map((p) => (

@@ -10,7 +10,7 @@
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { mergeRailLayout, normalizeLook, tileLettersOf, type RailEntry } from '../src/types';
-import { fileUrl, isAbsolutePath, posterSvg, resolveProjectPath, wrapTitle } from '../src/poster';
+import { contrastRatio, fileUrl, isAbsolutePath, PALETTES, posterSvg, randomPalette, resolveProjectPath, wrapTitle } from '../src/poster';
 
 let n = 0;
 const ok = (m: string) => { n++; console.log('PASS', m); };
@@ -76,6 +76,17 @@ const titled = (align: 'left' | 'center' | 'right') => posterSvg({ ...sample.pos
 assert.ok(titled('left').includes('text-anchor="start"') && titled('left').includes('<tspan x="24"') && titled('left').includes('font-size="48"'));
 assert.ok(titled('center').includes('text-anchor="middle"') && titled('center').includes('<tspan x="200"'));
 assert.ok(titled('right').includes('text-anchor="end"') && titled('right').includes('<tspan x="376"')); ok('short name XL and alignment');
+
+// ---- palettes: 20 unique built-ins; random palettes are valid hex and pick the better text color for the accent
+assert.equal(PALETTES.length, 20); assert.equal(new Set(PALETTES.map((p) => p.id)).size, 20);
+let seed = 7; const rng = () => { seed = (seed * 16807) % 2147483647; return (seed - 1) / 2147483646; };
+for (let i = 0; i < 200; i++) {
+  const p = randomPalette(rng);
+  assert.ok([p.primary, p.accent, p.text].every((c) => /^#[0-9a-f]{6}$/.test(c)), JSON.stringify(p));
+  const other = p.text === '#ffffff' ? '#111827' : '#ffffff';
+  assert.ok(contrastRatio(p.text, p.accent) >= contrastRatio(other, p.accent));
+}
+assert.ok(Math.abs(contrastRatio('#ffffff', '#000000') - 21) < 0.01); ok('palettes and randomPalette');
 
 // ---- wrapTitle: at most two lines, break after hyphens or at spaces, ellipsis on overflow
 assert.deepEqual(wrapTitle('Sandbox', 40, 352), ['Sandbox']);

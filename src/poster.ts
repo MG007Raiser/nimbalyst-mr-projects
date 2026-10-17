@@ -32,6 +32,16 @@ export const PALETTES: (Palette & { id: string; name: string })[] = [
   { id: 'birch-forest', name: 'Birch and forest', primary: '#fbf7f0', accent: '#2f7d4f', text: '#ffffff' },
   { id: 'frost-nord', name: 'Frost on nord', primary: '#88c0d0', accent: '#2e3440', text: '#ffffff' },
   { id: 'gold-rust', name: 'Gold and rust', primary: '#facc15', accent: '#7c2d12', text: '#ffffff' },
+  { id: 'ocean-coral', name: 'Ocean and coral', primary: '#0e7490', accent: '#fb7185', text: '#ffffff' },
+  { id: 'lavender-indigo', name: 'Lavender and indigo', primary: '#c4b5fd', accent: '#3730a3', text: '#ffffff' },
+  { id: 'sand-terracotta', name: 'Sand and terracotta', primary: '#f5e6c8', accent: '#c2410c', text: '#ffffff' },
+  { id: 'teal-night', name: 'Teal on night', primary: '#042f2e', accent: '#14b8a6', text: '#042f2e' },
+  { id: 'lemon-ink', name: 'Lemon and ink', primary: '#fef08a', accent: '#1e293b', text: '#fef08a' },
+  { id: 'rose-wine', name: 'Rose and wine', primary: '#fecdd3', accent: '#881337', text: '#ffffff' },
+  { id: 'steel-orange', name: 'Steel and orange', primary: '#334155', accent: '#fb923c', text: '#1c1917' },
+  { id: 'moss-cream', name: 'Moss and cream', primary: '#3f6212', accent: '#fef3c7', text: '#3f6212' },
+  { id: 'grape-lime', name: 'Grape and lime', primary: '#4c1d95', accent: '#a3e635', text: '#1a2e05' },
+  { id: 'ink-paper', name: 'Ink and paper', primary: '#18181b', accent: '#e4e4e7', text: '#18181b' },
 ];
 
 export function samePalette(a: Palette, b: Palette): boolean {
@@ -52,6 +62,44 @@ export function lighten(hex: string, t: number): string {
   const [r, g, b] = hexToRgb(hex);
   const mixc = (c: number) => Math.round(t >= 0 ? c + (255 - c) * t : c * (1 + t));
   return `#${[mixc(r), mixc(g), mixc(b)].map((c) => clamp(c, 0, 255).toString(16).padStart(2, '0')).join('')}`;
+}
+
+function hslToHex(h: number, s: number, l: number): string {
+  const a = (s / 100) * Math.min(l / 100, 1 - l / 100);
+  const f = (n: number) => {
+    const k = (n + h / 30) % 12;
+    const c = l / 100 - a * Math.max(-1, Math.min(k - 3, 9 - k, 1));
+    return Math.round(c * 255).toString(16).padStart(2, '0');
+  };
+  return `#${f(0)}${f(8)}${f(4)}`;
+}
+
+function luminance(hex: string): number {
+  const lin = (c: number) => { const v = c / 255; return v <= 0.03928 ? v / 12.92 : ((v + 0.055) / 1.055) ** 2.4; };
+  const [r, g, b] = hexToRgb(hex);
+  return 0.2126 * lin(r) + 0.7152 * lin(g) + 0.0722 * lin(b);
+}
+
+/** WCAG contrast ratio of two hex colors, 1 to 21. */
+export function contrastRatio(a: string, b: string): number {
+  const [hi, lo] = [luminance(a), luminance(b)].sort((x, y) => y - x);
+  return (hi + 0.05) / (lo + 0.05);
+}
+
+/**
+ * A random palette that hangs together: a dark or light base, an accent in a
+ * complementary, split or analogous hue at medium lightness, and whichever of
+ * white or near-black reads better on the accent (the title mostly sits on it).
+ */
+export function randomPalette(rand: () => number = Math.random): Palette {
+  const hue = Math.floor(rand() * 360);
+  const offsets = [180, 150, 210, 30, -30, 120];
+  const accentHue = (hue + offsets[Math.floor(rand() * offsets.length)] + 360) % 360;
+  const darkBase = rand() < 0.6;
+  const primary = hslToHex(hue, 35 + rand() * 35, darkBase ? 12 + rand() * 16 : 82 + rand() * 10);
+  const accent = hslToHex(accentHue, 60 + rand() * 30, 45 + rand() * 15);
+  const text = contrastRatio('#ffffff', accent) >= contrastRatio('#111827', accent) ? '#ffffff' : '#111827';
+  return { primary, accent, text };
 }
 
 export function isDarkHex(hex: string): boolean {
