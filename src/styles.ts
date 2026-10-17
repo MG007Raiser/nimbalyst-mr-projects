@@ -6,11 +6,13 @@ nav.project-rail.pt-native-hidden { display: none !important; }
 .pt-rail-host { flex: none; height: 100%; display: flex; }
 .pt-rail { width: 56px; height: 100%; background: var(--nim-bg-secondary); border-right: 1px solid var(--nim-border); display: flex; flex-direction: column; align-items: center; padding: 12px 0 8px; gap: 6px; overflow-y: auto; overflow-x: hidden; box-sizing: border-box; scrollbar-width: none; position: relative; }
 .pt-rail::-webkit-scrollbar { display: none; }
+.pt-rail.medium { width: 72px; }
 .pt-rail.wide { width: 88px; }
 .pt-rail * { box-sizing: border-box; }
 
 /* Projects */
 .pt-item { position: relative; display: flex; flex-direction: column; align-items: center; gap: 3px; width: 48px; padding: 4px 0; border-radius: 10px; cursor: pointer; border: none; background: transparent; color: inherit; font: inherit; flex: none; }
+.pt-rail.medium .pt-item { width: 64px; padding: 5px 0; }
 .pt-rail.wide .pt-item { width: 80px; padding: 5px 0 5px; }
 .pt-item:hover { background: var(--nim-bg-hover); }
 .pt-item.active { background: var(--nim-bg-selected); box-shadow: inset 0 0 0 1px var(--nim-primary); }
@@ -18,28 +20,35 @@ nav.project-rail.pt-native-hidden { display: none !important; }
 /* Projects that are not the open one sit back at 40%; hover brings them forward. */
 .pt-item:not(.active) .pt-tile { opacity: .4; }
 .pt-item:not(.active):hover .pt-tile, .pt-item:not(.active):focus-visible .pt-tile { opacity: 1; }
+.pt-rail.medium .pt-tile { width: 48px; height: 48px; border-radius: 11px; font-size: 14px; }
 .pt-rail.wide .pt-tile { width: 56px; height: 56px; border-radius: 12px; font-size: 15px; }
 .pt-tile img, .pt-tile svg { width: 100%; height: 100%; object-fit: cover; display: block; }
 .pt-tile .pt-emoji { font-size: 20px; line-height: 1; }
+.pt-rail.medium .pt-tile .pt-emoji { font-size: 24px; }
 .pt-rail.wide .pt-tile .pt-emoji { font-size: 28px; }
 .pt-symbol { font-family: 'Material Symbols Outlined', 'Material Symbols Rounded', 'Material Icons', sans-serif; font-size: 22px; line-height: 1; font-weight: normal; -webkit-font-feature-settings: 'liga'; font-feature-settings: 'liga'; }
+.pt-rail.medium .pt-tile .pt-symbol { font-size: 26px; }
 .pt-rail.wide .pt-tile .pt-symbol { font-size: 30px; }
 .pt-name { font-size: 10.5px; line-height: 1.2; color: var(--nim-text-muted); max-width: 76px; text-align: center; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; word-break: break-word; padding: 0 2px; }
+/* Medium names stay on one line. */
+.pt-rail.medium .pt-name { max-width: 62px; -webkit-line-clamp: 1; font-size: 10px; }
 .pt-item:not(.active) .pt-name { opacity: .6; }
 .pt-item:not(.active):hover .pt-name { opacity: 1; }
 .pt-item.active .pt-name { color: var(--nim-text); font-weight: 600; }
 .pt-badge { position: absolute; right: -4px; bottom: -4px; min-width: 16px; height: 16px; padding: 0 4px; border-radius: 8px; background: var(--nim-primary); color: var(--nim-on-primary, #111827); font-size: 10px; font-weight: 700; display: flex; align-items: center; justify-content: center; border: 2px solid var(--nim-bg-secondary); box-sizing: content-box; }
 .pt-close { position: absolute; top: -2px; right: 2px; width: 18px; height: 18px; border-radius: 50%; background: var(--nim-bg-tertiary); color: var(--nim-text-muted); border: 1px solid var(--nim-border); font-size: 12px; line-height: 1; display: none; align-items: center; justify-content: center; cursor: pointer; padding: 0; z-index: 1; }
-.pt-rail.wide .pt-close { right: 6px; }
+.pt-rail.medium .pt-close, .pt-rail.wide .pt-close { right: 6px; }
 .pt-item:hover .pt-close { display: flex; }
 .pt-close:hover { background: var(--nim-error); color: #fff; border-color: var(--nim-error); }
 
 /* Dividers */
 .pt-rule { position: relative; width: 48px; padding: 5px 0; flex: none; cursor: grab; }
+.pt-rail.medium .pt-rule { width: 64px; }
 .pt-rail.wide .pt-rule { width: 80px; }
 .pt-rule i { display: block; height: 1px; margin: 0 8px; background: var(--nim-border); }
 .pt-rule:hover i { background: var(--nim-text-faint); }
 .pt-label { position: relative; flex: none; max-width: 46px; padding: 2px 6px; border-radius: 3px; background: var(--nim-bg-tertiary); color: var(--nim-text-muted); font-size: 9.5px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; line-height: 1.3; cursor: grab; border: 1px solid var(--nim-border); }
+.pt-rail.medium .pt-label { max-width: 64px; font-size: 10px; padding: 3px 6px; }
 .pt-rail.wide .pt-label { max-width: 80px; font-size: 10px; padding: 3px 8px; }
 .pt-label-text { display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .pt-label:hover { color: var(--nim-text); border-color: var(--nim-text-faint); }
@@ -58,6 +67,7 @@ nav.project-rail.pt-native-hidden { display: none !important; }
 
 /* The divider line under the stack, with a + in its center for adding dividers. */
 .pt-divider { position: relative; width: 48px; height: 18px; margin: 2px 0; flex: none; display: flex; align-items: center; justify-content: center; }
+.pt-rail.medium .pt-divider { width: 64px; }
 .pt-rail.wide .pt-divider { width: 80px; }
 .pt-divider > i { position: absolute; left: 6px; right: 6px; top: 50%; height: 1px; background: var(--nim-border); }
 .pt-divider-add { position: relative; width: 18px; height: 18px; border-radius: 50%; border: 1px solid var(--nim-border); background: var(--nim-bg-secondary); color: var(--nim-text-faint); font-size: 13px; line-height: 1; display: flex; align-items: center; justify-content: center; cursor: pointer; padding: 0; z-index: 1; }
@@ -68,6 +78,7 @@ nav.project-rail.pt-native-hidden { display: none !important; }
 .pt-menu button .pt-symbol { font-size: 16px; color: var(--nim-text-muted); }
 .pt-menu-hint { font-size: 10.5px; color: var(--nim-text-faint); padding: 4px 8px 4px; border-top: 1px solid var(--nim-border); margin-top: 2px; }
 .pt-add { width: 40px; height: 40px; border-radius: 10px; border: 1px dashed var(--nim-border); background: transparent; color: var(--nim-text-faint); font-size: 18px; cursor: pointer; flex: none; }
+.pt-rail.medium .pt-add { width: 48px; height: 42px; }
 .pt-rail.wide .pt-add { width: 56px; height: 44px; }
 .pt-add:hover { color: var(--nim-text); border-color: var(--nim-text-faint); }
 

@@ -8,6 +8,9 @@
 export const LOOK_FILE = '.nimbalyst/project-theme.json';
 export const POSTER_SVG_FILE = '.nimbalyst/poster.svg';
 
+/** Width of the project rail: small (icons only), medium (bigger icons, one-line names), wide (two-line names). */
+export type RailSize = 'small' | 'medium' | 'wide';
+
 export type ShapeId = 'diagonal' | 'wave' | 'steps' | 'arc' | 'stripes';
 
 /**

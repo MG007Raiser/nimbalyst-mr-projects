@@ -28,12 +28,19 @@
         "wideRail": {
           "type": "boolean",
           "default": false,
-          "description": "Replace the left project rail with a wider one showing project icons and short names.",
+          "description": "Superseded by railSize; kept in step with it (true when railSize is wide) and read only when railSize is not set.",
           "scope": "user"
         },
         "projectLooks": {
           "type": "object",
           "description": "Cache of each project's look (theme, icon, tile, poster) keyed by project path, so the rail can paint projects that are not open. Managed automatically.",
+          "scope": "user"
+        },
+        "railSize": {
+          "type": "string",
+          "enum": ["small", "medium", "wide"],
+          "default": "small",
+          "description": "Width of the left project rail: small (icons only), medium (bigger icons, one-line names) or wide (two-line names). Managed from Project Settings › Mr. Projects.",
           "scope": "user"
         },
         "railLayout": {

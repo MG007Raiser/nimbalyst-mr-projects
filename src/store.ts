@@ -7,11 +7,12 @@
  */
 import type { ExtensionContext } from '@nimbalyst/extension-sdk';
 import { posterSrc } from './poster';
-import { defaultLook, LOOK_FILE, newId, normalizeLayout, normalizeLook, normalizeSavedPalettes, projectNameOf, type Palette, type ProjectLook, type RailEntry, type SavedPalette } from './types';
+import { defaultLook, LOOK_FILE, newId, normalizeLayout, normalizeLook, normalizeSavedPalettes, projectNameOf, type Palette, type ProjectLook, type RailEntry, type RailSize, type SavedPalette } from './types';
 
 const NS = 'com.fireworklabs.project-theme';
 const KEY_LOOKS = 'projectLooks';
 const KEY_WIDE = 'wideRail';
+const KEY_RAIL_SIZE = 'railSize';
 const KEY_LAYOUT = 'railLayout';
 const KEY_PALETTES = 'customPalettes';
 
@@ -96,15 +97,22 @@ export async function setLookInCache(projectPath: string, look: ProjectLook | nu
 
 /* ---- User-wide preferences ---- */
 
-export function getWideRail(): boolean {
-  const v = cfgGet<boolean>(KEY_WIDE);
-  if (typeof v === 'boolean') return v;
-  return lsGet<boolean>(KEY_WIDE) ?? false;
+const RAIL_SIZES: RailSize[] = ['small', 'medium', 'wide'];
+
+/** Rail size; before railSize existed, the wideRail boolean chose between small and wide. */
+export function getRailSize(): RailSize {
+  const v = cfgGet<string>(KEY_RAIL_SIZE) ?? lsGet<string>(KEY_RAIL_SIZE);
+  if (RAIL_SIZES.includes(v as RailSize)) return v as RailSize;
+  const wide = cfgGet<boolean>(KEY_WIDE);
+  return (typeof wide === 'boolean' ? wide : lsGet<boolean>(KEY_WIDE) ?? false) ? 'wide' : 'small';
 }
 
-export async function setWideRail(on: boolean): Promise<void> {
-  lsSet(KEY_WIDE, on);
-  await cfgSet(KEY_WIDE, on);
+export async function setRailSize(size: RailSize): Promise<void> {
+  lsSet(KEY_RAIL_SIZE, size);
+  await cfgSet(KEY_RAIL_SIZE, size);
+  // Keep wideRail in step so an older Mr. Projects still shows a sensible rail.
+  lsSet(KEY_WIDE, size === 'wide');
+  await cfgSet(KEY_WIDE, size === 'wide');
   emit();
 }
 

@@ -13,7 +13,7 @@
 import { useEffect, useMemo, useRef, useState, type CSSProperties, type DragEvent } from 'react';
 import { createPortal } from 'react-dom';
 import { posterDataUri, fileUrl } from '../poster';
-import { getBridge, getLook, getLooksCache, getRailLayout, getWideRail, orderedEntries, refreshFromDisk, setRailLayout, setRailProjects, subscribe, type RailProject } from '../store';
+import { getBridge, getLook, getLooksCache, getRailLayout, getRailSize, orderedEntries, refreshFromDisk, setRailLayout, setRailProjects, subscribe, type RailProject } from '../store';
 import { entryKey, initialsOf, mergeRailLayout, newId, projectNameOf, type ProjectLook, type RailEntry } from '../types';
 
 interface RailItem extends RailProject {
@@ -92,7 +92,7 @@ type Drop = { key: string; before: boolean } | null;
 export function RailEnhancer() {
   const [container, setContainer] = useState<HTMLElement | null>(null);
   const [items, setItems] = useState<RailItem[]>([]);
-  const [wide, setWide] = useState(() => getWideRail());
+  const [size, setSize] = useState(() => getRailSize());
   const [version, setVersion] = useState(0);
   const [dragKey, setDragKey] = useState<string | null>(null);
   const [drop, setDrop] = useState<Drop>(null);
@@ -105,7 +105,7 @@ export function RailEnhancer() {
   const menuRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => subscribe(() => {
-    setWide(getWideRail());
+    setSize(getRailSize());
     setVersion((v) => v + 1);
   }), []);
 
@@ -272,7 +272,7 @@ export function RailEnhancer() {
   const dropClass = (key: string) => (drop?.key === key ? (drop.before ? ' drop-before' : ' drop-after') : '');
 
   return createPortal(
-    <nav className={`pt-rail${wide ? ' wide' : ''}${dragKey ? ' dragging' : ''}`} aria-label="Open projects" data-testid="project-theme-rail" onDrop={onDrop} onDragOver={(e) => { if (dragKey) e.preventDefault(); }}>
+    <nav className={`pt-rail${size === 'small' ? '' : ` ${size}`}${dragKey ? ' dragging' : ''}`} aria-label="Open projects" data-testid="project-theme-rail" onDrop={onDrop} onDragOver={(e) => { if (dragKey) e.preventDefault(); }}>
       {entries.map((entry) => {
         const key = entryKey(entry);
         if (entry.kind === 'rule') {
@@ -329,7 +329,7 @@ export function RailEnhancer() {
         const item = byPath.get(entry.path);
         if (!item) return null;
         const look = looks[item.path] ?? null;
-        const label = wide ? (look?.shortName || item.name) : '';
+        const label = size === 'small' ? '' : look?.shortName || item.name;
         return (
           <div
             key={key}
@@ -354,7 +354,7 @@ export function RailEnhancer() {
               <TileContent look={look} item={item} />
               {item.badge ? <span className="pt-badge" aria-label={`${item.badge} streaming session(s)`}>{item.badge}</span> : null}
             </div>
-            {wide ? <span className="pt-name">{label}</span> : null}
+            {label ? <span className="pt-name">{label}</span> : null}
             <button
               type="button"
               className="pt-close"

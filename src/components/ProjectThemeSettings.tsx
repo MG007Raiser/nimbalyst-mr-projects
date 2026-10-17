@@ -6,11 +6,11 @@ import type { SettingsPanelProps } from '@nimbalyst/extension-sdk';
 import { HERO_PATTERNS, PALETTES, SHAPES, fileUrl, posterDataUri, posterSvg, resolveProjectPath, samePalette, shapeName } from '../poster';
 import { heroPatternById } from '../heroPatterns';
 import {
-  deletePalette, getBridge, getExtensionContext, getLook, getRailLayout, getSavedPalettes, getWideRail, openFolderLabel, refreshFromDisk, savePalette, setLookInCache, setRailLayout, setWideRail, subscribe,
+  deletePalette, getBridge, getExtensionContext, getLook, getRailLayout, getSavedPalettes, getRailSize, openFolderLabel, refreshFromDisk, savePalette, setLookInCache, setRailLayout, setRailSize, subscribe,
   THEME_EDITOR_ID, toast, writeLookFile, writeProjectFile, type ThemeSummary,
 } from '../store';
 import { ensureStyles } from '../styles';
-import { defaultLook, initialsOf, POSTER_SVG_FILE, projectNameOf, type BannerSize, type IconSpec, type Palette, type PosterSpec, type ProjectLook, type SavedPalette, type TileSpec } from '../types';
+import { defaultLook, initialsOf, POSTER_SVG_FILE, projectNameOf, type BannerSize, type IconSpec, type Palette, type PosterSpec, type ProjectLook, type RailSize, type SavedPalette, type TileSpec } from '../types';
 import { PosterFrame } from './PosterFrame';
 
 function Toggle({ on, onChange }: { on: boolean; onChange: (v: boolean) => void }) {
@@ -75,7 +75,7 @@ function SettingsBody({ path }: { path: string }) {
   const name = projectNameOf(path);
   const [look, setLook] = useState<ProjectLook>(() => getLook(path) ?? defaultLook());
   const [dirty, setDirty] = useState(false);
-  const [wide, setWide] = useState(() => getWideRail());
+  const [railSize, setRailSizeState] = useState(() => getRailSize());
   const [layoutCount, setLayoutCount] = useState(() => getRailLayout().filter((e) => e.kind !== 'project').length);
   const [saving, setSaving] = useState(false);
   const [imagePath, setImagePath] = useState(look.poster.source === 'image' ? look.poster.file ?? '' : '');
@@ -95,7 +95,7 @@ function SettingsBody({ path }: { path: string }) {
     });
   }, [path]);
   useEffect(() => subscribe(() => {
-    setWide(getWideRail());
+    setRailSizeState(getRailSize());
     setLayoutCount(getRailLayout().filter((e) => e.kind !== 'project').length);
     setSaved(getSavedPalettes());
   }), []);
@@ -219,8 +219,8 @@ function SettingsBody({ path }: { path: string }) {
       <div className="pt-sec">
         <h3>Left rail</h3>
         <div className="pt-frow">
-          <label>Wide rail with project names <Faint>(applies to all projects; names wrap to two lines)</Faint></label>
-          <Toggle on={wide} onChange={(v) => void setWideRail(v)} />
+          <label>Rail size <Faint>(applies to all projects; medium and wide show names)</Faint></label>
+          <Seg<RailSize> value={railSize} options={[['small', 'Small'], ['medium', 'Medium'], ['wide', 'Wide']]} onChange={(v) => void setRailSize(v)} />
         </div>
         <div className="pt-frow">
           <label>Preview</label>
