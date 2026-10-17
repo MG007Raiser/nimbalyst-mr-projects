@@ -10,7 +10,7 @@ import {
   THEME_EDITOR_ID, toast, writeLookFile, writeProjectFile, type ThemeSummary,
 } from '../store';
 import { ensureStyles } from '../styles';
-import { defaultLook, initialsOf, POSTER_SVG_FILE, projectNameOf, type IconSpec, type Palette, type PosterSpec, type ProjectLook, type SavedPalette, type TileSpec } from '../types';
+import { defaultLook, initialsOf, POSTER_SVG_FILE, projectNameOf, type BannerSize, type IconSpec, type Palette, type PosterSpec, type ProjectLook, type SavedPalette, type TileSpec } from '../types';
 import { PosterFrame } from './PosterFrame';
 
 function Toggle({ on, onChange }: { on: boolean; onChange: (v: boolean) => void }) {
@@ -289,8 +289,12 @@ function SettingsBody({ path }: { path: string }) {
         <h3>Poster</h3>
         <div className="pt-d">A banner at the top of the left column (files, sessions, or tracker), also available as the rail tile.</div>
         <div className="pt-frow">
-          <label>Show poster in left column</label>
-          <Toggle on={look.poster.show} onChange={(v) => updatePoster({ show: v })} />
+          <label>Banner in left column <Faint>(full column width; smaller sizes are shorter)</Faint></label>
+          <Seg<BannerSize | 'hidden'>
+            value={look.poster.show ? look.poster.size : 'hidden'}
+            options={[['hidden', 'Hidden'], ['small', 'Small'], ['medium', 'Medium'], ['large', 'Large']]}
+            onChange={(v) => updatePoster(v === 'hidden' ? { show: false } : { show: true, size: v })}
+          />
         </div>
         <div className="pt-frow">
           <label>Source</label>
@@ -421,7 +425,7 @@ function SettingsBody({ path }: { path: string }) {
             {posterPreview ? (
               <>
                 <div className="pt-posterprev">
-                  <PosterFrame src={posterPreview} alt="Poster preview" sandboxed={look.poster.sandboxed} className="banner" />
+                  <PosterFrame src={posterPreview} alt="Poster preview" sandboxed={look.poster.sandboxed} className={`banner pt-size-${look.poster.size}`} />
                 </div>
                 {look.poster.openFolderButton ? (
                   <button type="button" className="pt-dock-open" style={{ marginTop: 6 }} disabled>

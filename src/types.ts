@@ -44,9 +44,14 @@ export interface PatternSpec {
   opacity: number;
 }
 
+/** Height preset of the docked banner. Always full column width; smaller is shorter. */
+export type BannerSize = 'small' | 'medium' | 'large';
+
 export interface PosterSpec {
   /** Whether the poster is docked at the top of the left column. */
   show: boolean;
+  /** Banner height preset: large is 16:9, medium 8:3, small a 40:9 strip. */
+  size: BannerSize;
   source: 'generated' | 'pattern' | 'image';
   /** Project-relative path of an image poster, or of the saved generated SVG. */
   file?: string;
@@ -83,6 +88,7 @@ export function defaultLook(): ProjectLook {
     tile: { kind: 'gradient', from: DEFAULT_PRIMARY, to: DEFAULT_ACCENT, angle: 135 },
     poster: {
       show: true,
+      size: 'large',
       source: 'generated',
       shape: 'wave',
       palette: { primary: DEFAULT_PRIMARY, accent: DEFAULT_ACCENT, text: DEFAULT_TEXT },
@@ -104,6 +110,7 @@ export function isDarkColor(hex: string): boolean {
 }
 
 const SHAPES: ShapeId[] = ['diagonal', 'wave', 'steps', 'arc', 'stripes'];
+const BANNER_SIZES: BannerSize[] = ['small', 'medium', 'large'];
 /** Shapes from 0.2 that no longer exist, mapped to their nearest survivor. */
 const LEGACY_SHAPES: Record<string, ShapeId> = { 'diagonal-shadow': 'diagonal' };
 const HEX = /^#([0-9a-f]{3}|[0-9a-f]{6}|[0-9a-f]{8})$/i;
@@ -162,6 +169,7 @@ export function normalizeLook(input: unknown): ProjectLook {
     tile: tileSpec,
     poster: {
       show: legacyNone ? false : bool(poster.show, true),
+      size: BANNER_SIZES.includes(poster.size as BannerSize) ? (poster.size as BannerSize) : d.poster.size,
       source,
       file: typeof poster.file === 'string' ? poster.file : undefined,
       shape,

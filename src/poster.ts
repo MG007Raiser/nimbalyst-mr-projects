@@ -4,7 +4,7 @@
  * and the rail thumbnail all agree.
  */
 import { HERO_PATTERNS, heroPatternById } from './heroPatterns';
-import type { Palette, PosterSpec, ShapeId, TitleSpec } from './types';
+import type { BannerSize, Palette, PosterSpec, ShapeId, TitleSpec } from './types';
 
 export const SHAPES: { id: ShapeId; name: string }[] = [
   { id: 'diagonal', name: 'Diagonal' },
@@ -129,15 +129,23 @@ export interface PosterRenderOptions {
   title?: string;
   /** Omit the title overlay entirely (thumbnails). */
   noTitle?: boolean;
-  /** Aspect: square (400x400) or banner (400x225). */
+  /** Aspect: square (400x400) or banner (400 wide, height from the spec's size preset). */
   aspect?: 'square' | 'banner';
 }
+
+/** Banner height in the 400-wide box per size preset, with the title's font scale and edge padding. */
+export const BANNER_SIZES: Record<BannerSize, { height: number; font: number; pad: number }> = {
+  large: { height: 225, font: 0.8, pad: 24 },
+  medium: { height: 150, font: 0.66, pad: 20 },
+  small: { height: 90, font: 0.5, pad: 14 },
+};
 
 /** Render a poster spec to a standalone SVG string. Fills are solid: primary base, accent figure, text overlay. */
 export function posterSvg(spec: PosterSpec, opts: PosterRenderOptions = {}): string {
   const { palette, title } = spec;
   const W = 400;
-  const H = opts.aspect === 'banner' ? 225 : 400;
+  const banner = opts.aspect === 'banner' ? BANNER_SIZES[spec.size] ?? BANNER_SIZES.large : null;
+  const H = banner ? banner.height : 400;
   const isPattern = spec.source === 'pattern';
   const base = palette.primary;
   const fig = palette.accent;
@@ -160,13 +168,14 @@ export function posterSvg(spec: PosterSpec, opts: PosterRenderOptions = {}): str
   let text = '';
   const label = (opts.title ?? '').trim();
   if (!opts.noTitle && label) {
-    const fs = Math.round(titleFont(title.size) * (opts.aspect === 'banner' ? 0.8 : 1));
+    const fs = Math.round(titleFont(title.size) * (banner ? banner.font : 1));
+    const pad = banner ? banner.pad : 24;
     const shadow = `text-shadow: 0 2px 8px rgba(0,0,0,.35)`;
     // Up to two lines, anchored to the same bottom baseline whether there are one or two.
-    const lines = wrapTitle(label, fs, W - 48);
+    const lines = wrapTitle(label, fs, W - pad * 2);
     const lineHeight = Math.round(fs * 1.02);
-    const baseline = H - 24;
-    const tspans = lines.map((line, idx) => `<tspan x="24" y="${baseline - (lines.length - 1 - idx) * lineHeight}">${esc(line)}</tspan>`).join('');
+    const baseline = H - pad;
+    const tspans = lines.map((line, idx) => `<tspan x="${pad}" y="${baseline - (lines.length - 1 - idx) * lineHeight}">${esc(line)}</tspan>`).join('');
     text = `<text text-anchor="start" font-family="-apple-system, 'SF Pro Display', Inter, system-ui, sans-serif" font-size="${fs}" font-weight="800" letter-spacing="-0.02em" fill="${palette.text}" style="${shadow}">${tspans}</text>`;
   }
 

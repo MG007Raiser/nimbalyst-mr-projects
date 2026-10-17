@@ -79,6 +79,10 @@ nav.project-rail.pt-native-hidden { display: none !important; }
 .pt-dock { padding: 8px 8px 6px; border-bottom: 1px solid var(--nim-border); display: flex; flex-direction: column; gap: 6px; }
 .pt-poster-frame { position: relative; border-radius: 8px; overflow: hidden; background: var(--nim-bg-tertiary); box-shadow: 0 4px 14px rgba(0,0,0,.25); aspect-ratio: 1 / 1; }
 .pt-poster-frame.banner { aspect-ratio: 16 / 9; }
+.pt-poster-frame.banner.pt-size-medium { aspect-ratio: 8 / 3; }
+.pt-poster-frame.banner.pt-size-small { aspect-ratio: 40 / 9; }
+.pt-poster-frame.pt-size-small .pt-chip-sandboxed { top: 4px; right: 4px; }
+.pt-poster-frame.pt-size-small .pt-dock-gear { right: 4px; bottom: 4px; width: 22px; height: 22px; }
 .pt-poster-frame img { width: 100%; height: 100%; display: block; object-fit: cover; }
 .pt-chip-sandboxed { position: absolute; top: 6px; right: 6px; display: inline-flex; align-items: center; gap: 4px; padding: 2px 7px 2px 5px; border-radius: 999px; background: #16a34a; color: #fff; font-size: 10px; font-weight: 700; letter-spacing: .02em; line-height: 1.4; box-shadow: 0 1px 4px rgba(0,0,0,.35); pointer-events: none; }
 .pt-chip-sandboxed svg { flex: none; }
@@ -170,7 +174,7 @@ nav.project-rail.pt-native-hidden { display: none !important; }
 .pt .pt-pal-x:hover { background: var(--nim-error); color: #fff; border-color: var(--nim-error); }
 .pt .pt-pal-label { display: block; font-size: 10px; color: var(--nim-text-faint); text-align: center; margin-top: 3px; max-width: 56px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .pt .pt-builder { display: grid; grid-template-columns: minmax(0, 1fr) 220px; gap: 18px; }
-.pt .pt-posterprev { border-radius: 10px; overflow: hidden; aspect-ratio: 16 / 9; background: var(--nim-bg-tertiary); }
+.pt .pt-posterprev { border-radius: 10px; overflow: hidden; background: var(--nim-bg-tertiary); }
 .pt .pt-posterprev img { width: 100%; height: 100%; display: block; object-fit: cover; }
 .pt .pt-posterprev .pt-poster-frame { border-radius: 10px; box-shadow: none; }
 .pt .pt-tileprev { display: flex; align-items: center; gap: 12px; }

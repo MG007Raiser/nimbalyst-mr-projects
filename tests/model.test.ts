@@ -50,6 +50,17 @@ const svg = posterSvg(sample.poster, { title: 'Sandbox', aspect: 'banner' });
 assert.ok(!svg.includes('linearGradient')); assert.ok(svg.includes('fill="#1e293b"')); assert.ok(svg.includes('fill="#ffffff"'));
 assert.ok(svg.includes('viewBox="0 0 400 225"')); ok('banner SVG: no gradient, palette fills, 16:9');
 
+// ---- banner size presets: default large, file value kept, junk falls back; SVG height and title follow the size
+assert.equal(sample.poster.size, 'large'); assert.equal(normalizeLook({ poster: { size: 'medium' } }).poster.size, 'medium');
+assert.equal(normalizeLook({ poster: { size: 'small', show: false } }).poster.size, 'small'); assert.equal(normalizeLook({ poster: { size: 'huge' } }).poster.size, 'large');
+assert.equal(normalizeLook({ poster: { size: 'small', show: false } }).poster.show, false); ok('banner size normalizes');
+const sized = (size: 'small' | 'medium' | 'large') => posterSvg({ ...sample.poster, size }, { title: 'Sandbox', aspect: 'banner' });
+assert.ok(sized('large').includes('viewBox="0 0 400 225"') && sized('large').includes('font-size="38"'));
+assert.ok(sized('medium').includes('viewBox="0 0 400 150"') && sized('medium').includes('font-size="32"'));
+assert.ok(sized('small').includes('viewBox="0 0 400 90"') && sized('small').includes('font-size="24"') && sized('small').includes('<tspan x="14" y="76">'));
+assert.ok(sized('small').includes('translate(0 -310)'));
+assert.ok(posterSvg({ ...sample.poster, size: 'small' }, { noTitle: true }).includes('viewBox="0 0 400 400"')); ok('banner SVG height, title size and padding follow the size; square is unaffected');
+
 // ---- wrapTitle: at most two lines, break after hyphens or at spaces, ellipsis on overflow
 assert.deepEqual(wrapTitle('Sandbox', 40, 352), ['Sandbox']);
 assert.deepEqual(wrapTitle('UX-review-checklist', 40, 352), ['UX-review-', 'checklist']);

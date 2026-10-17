@@ -13,6 +13,7 @@
  *   ?shot=rail|settings   which screenshot to render (default: rail)
  *   ?theme=<fixture id>   which Mr. Themes preset the active project uses
  *                         (default: harbor-dark-juicy); see fixtures/themes.json
+ *   ?banner=small|medium|large  the active project's banner size (default: large)
  */
 import { createRoot } from 'react-dom/client';
 import { activate, hostComponents, settingsPanel } from '../../src/index';
@@ -27,6 +28,7 @@ import themeFixturesJson from './fixtures/themes.json';
 const params = new URLSearchParams(location.search);
 const SHOT: 'rail' | 'settings' = params.get('shot') === 'settings' ? 'settings' : 'rail';
 const THEME_ID = params.get('theme') || 'harbor-dark-juicy';
+const BANNER = (['small', 'medium', 'large'] as const).find((s) => s === params.get('banner')) ?? 'large';
 document.documentElement.dataset.shot = SHOT;
 
 /* ------------------------------------------------------------------ */
@@ -50,6 +52,7 @@ interface DemoProject {
 const photoPoster = (primary: string, accent: string) =>
   ({
     show: true,
+    size: 'large',
     source: 'generated',
     shape: 'wave',
     palette: { primary, accent, text: '#ffffff' },
@@ -95,6 +98,7 @@ const demoProjects: DemoProject[] = [
       tile: { kind: 'solid', color: '#facc15' },
       poster: {
         show: true,
+        size: BANNER,
         source: 'generated',
         shape: 'wave',
         palette: { primary: '#fde047', accent: '#22c55e', text: '#14532d' },
@@ -115,6 +119,7 @@ const demoProjects: DemoProject[] = [
       tile: { kind: 'solid', color: '#a3e635' },
       poster: {
         show: true,
+        size: 'large',
         source: 'generated',
         shape: 'diagonal',
         palette: { primary: '#a3e635', accent: '#facc15', text: '#14532d' },

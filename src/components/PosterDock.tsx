@@ -86,7 +86,7 @@ export function PosterDock() {
 
   return createPortal(
     <div className="pt-dock" data-testid="project-poster-dock" data-version={version}>
-      <PosterFrame src={src} alt={`${name} poster`} sandboxed={look.poster.sandboxed} className="banner">
+      <PosterFrame src={src} alt={`${name} poster`} sandboxed={look.poster.sandboxed} className={`banner pt-size-${look.poster.size}`}>
         <button type="button" className="pt-dock-gear" title="Mr. Projects settings" aria-label="Open Mr. Projects settings" onClick={() => void openProjectThemeSettings()}>
           <GearIcon />
         </button>

@@ -21,7 +21,7 @@ Draft for the Nimbalyst extension marketplace, 2026-10-02. Nimbalyst does not do
 
 **Long description**
 
-> Make every project look like itself. Mr. Projects replaces the project rail with one that shows each project's icon and name, lets you drag projects into your own order, and adds rules and headings to group them. Each project gets a poster: a 16:9 banner at the top of the left column, built from a shape or one of 22 Hero Patterns in a three-color palette, or your own image, with its short name on top. Optional extras per project: a Sandboxed chip and an Open in Finder button. With Mr. Themes installed, each project also gets its own color theme, applied whenever you switch to it. A project's look is saved in `.nimbalyst/project-theme.json`, so it travels with the repository.
+> Make every project look like itself. Mr. Projects replaces the project rail with one that shows each project's icon and name, lets you drag projects into your own order, and adds rules and headings to group them. Each project gets a poster: a banner at the top of the left column in one of three heights, built from a shape or one of 22 Hero Patterns in a three-color palette, or your own image, with its short name on top. Optional extras per project: a Sandboxed chip and an Open in Finder button. With Mr. Themes installed, each project also gets its own color theme, applied whenever you switch to it. A project's look is saved in `.nimbalyst/project-theme.json`, so it travels with the repository.
 
 **Highlights** (kept from the `marketplace` block that was already in `manifest.json`)
 

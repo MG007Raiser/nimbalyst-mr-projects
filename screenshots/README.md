@@ -93,6 +93,9 @@ Query params:
   `RailEnhancer` → bridge `setOverride` path, not a shortcut. Used here:
   `harbor-dark-juicy` (dark shots) and `harbor-light-subtle` (light shots).
   See `harness/fixtures/themes.json` for the other 6 available ids.
+- `banner=small|medium|large` (default `large`) — the active project's
+  banner size preset, for checking the docked banner and the settings
+  preview at each height.
 
 Navigate between shots in one session with `browser_navigate` (same URL,
 different query string) rather than reopening a session each time.
