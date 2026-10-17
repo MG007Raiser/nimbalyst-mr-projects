@@ -59,7 +59,7 @@
     }
   },
   "marketplace": {
-    "changelog": "0.6.0 (MG007Raiser fork): Small / Medium / Wide rail; tile letters, also over poster and image tiles; Small / Medium / Large banner; XL short name with left, center or right alignment; 20 palettes plus Auto generate; Browse and image URLs for image tiles and posters, with animated GIF support.\n0.5.2 (MG007Raiser fork): Image tiles and posters work on Windows; a broken tile image retries after the path is fixed.\n0.5.1: Deleting a rail rule or heading now deletes it instead of moving it to the bottom.\n0.5.0: Renamed from Custom Project Themes; new gutter icon and help tooltip; gear on the docked poster opens the settings.\n0.4.x: Three-color solid poster palettes with saved palettes; two-line short-name overlay; custom gutter icon.",
+    "changelog": "0.6.0: Small / Medium / Wide rail; tile letters, also over poster and image tiles; Small / Medium / Large banner; XL short name with left, center or right alignment; 20 palettes plus Auto generate; Browse and image URLs for image tiles and posters, with animated GIF support.\n0.5.2: Image tiles and posters work on Windows; a broken tile image retries after the path is fixed.\n0.5.1: Deleting a rail rule or heading now deletes it instead of moving it to the bottom.\n0.5.0: Renamed from Custom Project Themes; new gutter icon and help tooltip; gear on the docked poster opens the settings.\n0.4.x: Three-color solid poster palettes with saved palettes; two-line short-name overlay; custom gutter icon.",
     "categories": ["developer-tools"],
     "tags": ["theme", "projects", "workspace", "poster", "left-rail", "sidebar", "organization", "per-project"],
     "icon": "wallpaper",
