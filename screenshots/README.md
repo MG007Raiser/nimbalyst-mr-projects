@@ -30,7 +30,7 @@ under `/Users/demo/Projects/...` and sit in the rail under three text headings:
 | Clients | Atlas API | initials, royal blue gradient |
 | Clients | Bluewater | initials, sky blue gradient |
 | Team | Field Notes (the active project) | poster thumbnail, yellow base with a green wave |
-| Team | Orchard | poster thumbnail, lime base with a yellow diagonal |
+| Team | Orchard | poster thumbnail, lime base with a yellow diagonal, tile letter O over it |
 | Home | Pink House | photo |
 | Home | Flamingo | photo |
 
@@ -93,6 +93,9 @@ Query params:
   `RailEnhancer` → bridge `setOverride` path, not a shortcut. Used here:
   `harbor-dark-juicy` (dark shots) and `harbor-light-subtle` (light shots).
   See `harness/fixtures/themes.json` for the other 6 available ids.
+- `rail=small|medium|wide` (default `wide`) — the rail size.
+- `align=left|center|right` (default `left`) — the active project's
+  short-name alignment.
 - `banner=small|medium|large` (default `large`) — the active project's
   banner size preset, for checking the docked banner and the settings
   preview at each height.

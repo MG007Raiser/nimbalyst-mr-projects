@@ -14,6 +14,8 @@
  *   ?theme=<fixture id>   which Mr. Themes preset the active project uses
  *                         (default: harbor-dark-juicy); see fixtures/themes.json
  *   ?banner=small|medium|large  the active project's banner size (default: large)
+ *   ?rail=small|medium|wide     the rail size (default: wide)
+ *   ?align=left|center|right    the active project's short-name alignment (default: left)
  */
 import { createRoot } from 'react-dom/client';
 import { activate, hostComponents, settingsPanel } from '../../src/index';
@@ -29,6 +31,8 @@ const params = new URLSearchParams(location.search);
 const SHOT: 'rail' | 'settings' = params.get('shot') === 'settings' ? 'settings' : 'rail';
 const THEME_ID = params.get('theme') || 'harbor-dark-juicy';
 const BANNER = (['small', 'medium', 'large'] as const).find((s) => s === params.get('banner')) ?? 'large';
+const RAIL = (['small', 'medium', 'wide'] as const).find((s) => s === params.get('rail')) ?? 'wide';
+const ALIGN = (['left', 'center', 'right'] as const).find((s) => s === params.get('align')) ?? 'left';
 document.documentElement.dataset.shot = SHOT;
 
 /* ------------------------------------------------------------------ */
@@ -103,7 +107,7 @@ const demoProjects: DemoProject[] = [
         shape: 'wave',
         palette: { primary: '#fde047', accent: '#22c55e', text: '#14532d' },
         pattern: { id: 'leaf', scale: 1.2, opacity: 0.4 },
-        title: { size: 'L', align: 'left' },
+        title: { size: 'L', align: ALIGN },
         sandboxed: true,
         openFolderButton: true,
       },
@@ -115,7 +119,8 @@ const demoProjects: DemoProject[] = [
     look: makeLook({
       themeId: null,
       shortName: 'Orchard',
-      icon: { kind: 'poster' },
+      tileLetters: 'O',
+      icon: { kind: 'poster', letters: true },
       tile: { kind: 'solid', color: '#a3e635' },
       poster: {
         show: true,
@@ -205,7 +210,8 @@ const railLayout: RailEntry[] = [
 ];
 
 const configStore: Record<string, unknown> = {
-  wideRail: true,
+  wideRail: RAIL === 'wide',
+  railSize: RAIL,
   projectLooks: projectLooksCfg,
   railLayout,
   customPalettes: [],
