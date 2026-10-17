@@ -29,7 +29,8 @@ export interface SavedPalette extends Palette {
   name: string;
 }
 
-export type IconSpec = { kind: 'initials' } | { kind: 'poster' } | { kind: 'image'; file: string };
+/** Rail tile icon. On poster and image tiles, letters: true draws the tile letters over the picture. */
+export type IconSpec = { kind: 'initials' } | { kind: 'poster'; letters?: boolean } | { kind: 'image'; file: string; letters?: boolean };
 
 export type TileSpec = { kind: 'solid'; color: string } | { kind: 'gradient'; from: string; to: string; angle: number };
 
@@ -73,6 +74,8 @@ export interface ProjectLook {
   /** Mr. Themes theme id, or null for "same as global". */
   themeId: string | null;
   shortName: string;
+  /** Up to three letters for the rail tile; empty means initials from the project name. */
+  tileLetters: string;
   icon: IconSpec;
   tile: TileSpec;
   poster: PosterSpec;
@@ -87,6 +90,7 @@ export function defaultLook(): ProjectLook {
     version: 1,
     themeId: null,
     shortName: '',
+    tileLetters: '',
     icon: { kind: 'initials' },
     tile: { kind: 'gradient', from: DEFAULT_PRIMARY, to: DEFAULT_ACCENT, angle: 135 },
     poster: {
@@ -156,8 +160,8 @@ export function normalizeLook(input: unknown): ProjectLook {
 
   // 0.2 files may carry emoji/symbol icons; they fall back to initials.
   let iconSpec: IconSpec = d.icon;
-  if (icon.kind === 'poster') iconSpec = { kind: 'poster' };
-  else if (icon.kind === 'image' && typeof icon.file === 'string') iconSpec = { kind: 'image', file: icon.file };
+  if (icon.kind === 'poster') iconSpec = { kind: 'poster', letters: bool(icon.letters, false) };
+  else if (icon.kind === 'image' && typeof icon.file === 'string') iconSpec = { kind: 'image', file: icon.file, letters: bool(icon.letters, false) };
 
   // 0.2 files may carry auto/theme tiles; they become a gradient from the poster palette.
   let tileSpec: TileSpec = { kind: 'gradient', from: primary, to: accent, angle: 135 };
@@ -168,6 +172,7 @@ export function normalizeLook(input: unknown): ProjectLook {
     version: 1,
     themeId: typeof o.themeId === 'string' && o.themeId ? o.themeId : null,
     shortName: typeof o.shortName === 'string' ? o.shortName.slice(0, 40) : '',
+    tileLetters: typeof o.tileLetters === 'string' ? Array.from(o.tileLetters.trim()).slice(0, 3).join('') : '',
     icon: iconSpec,
     tile: tileSpec,
     poster: {
@@ -258,6 +263,11 @@ export function initialsOf(name: string): string {
   if (words.length === 0) return '?';
   if (words.length === 1) return words[0].slice(0, 2).toUpperCase();
   return (words[0][0] + words[1][0]).toUpperCase();
+}
+
+/** The letters a rail tile shows: the look's own, or initials from the project name. */
+export function tileLettersOf(look: { tileLetters?: string } | null | undefined, name: string): string {
+  return look?.tileLetters?.trim() || initialsOf(name);
 }
 
 export function projectNameOf(path: string): string {

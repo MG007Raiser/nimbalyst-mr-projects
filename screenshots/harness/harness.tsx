@@ -37,8 +37,8 @@ document.documentElement.dataset.shot = SHOT;
 
 const DEMO_ROOT = '/Users/demo/Projects';
 
-function makeLook(partial: Omit<ProjectLook, 'version'>): ProjectLook {
-  return { version: 1, ...partial };
+function makeLook(partial: Omit<ProjectLook, 'version' | 'tileLetters'> & { tileLetters?: string }): ProjectLook {
+  return { version: 1, tileLetters: '', ...partial };
 }
 
 interface DemoProject {

@@ -10,8 +10,9 @@ import {
   THEME_EDITOR_ID, toast, writeLookFile, writeProjectFile, type ThemeSummary,
 } from '../store';
 import { ensureStyles } from '../styles';
-import { defaultLook, initialsOf, POSTER_SVG_FILE, projectNameOf, type BannerSize, type IconSpec, type Palette, type PosterSpec, type ProjectLook, type RailSize, type SavedPalette, type TileSpec } from '../types';
+import { defaultLook, initialsOf, POSTER_SVG_FILE, projectNameOf, tileLettersOf, type BannerSize, type IconSpec, type Palette, type PosterSpec, type ProjectLook, type RailSize, type SavedPalette, type TileSpec } from '../types';
 import { PosterFrame } from './PosterFrame';
+import { TileLetters } from './RailEnhancer';
 
 function Toggle({ on, onChange }: { on: boolean; onChange: (v: boolean) => void }) {
   return <button type="button" className={`pt-toggle${on ? ' on' : ''}`} role="switch" aria-checked={on} onClick={() => onChange(!on)} />;
@@ -161,6 +162,13 @@ function SettingsBody({ path }: { path: string }) {
   const currentTheme = look.themeId ? themes.find((t) => t.id === look.themeId) ?? null : null;
   const currentThemeLabel = look.themeId === null ? 'Global theme' : currentTheme?.name ?? look.themeId;
 
+  const lettersOver = look.icon.kind !== 'initials' && !!look.icon.letters;
+  const tileText = tileLettersOf(look, name);
+  const tilePreviewSrc = look.icon.kind === 'poster' && isGenerated ? posterDataUri(look.poster, { noTitle: true })
+    : look.icon.kind === 'poster' && imagePath ? fileUrl(path, imagePath)
+    : look.icon.kind === 'image' && look.icon.file ? fileUrl(path, look.icon.file)
+    : null;
+
   const tileBg = (): string => (tile.kind === 'solid' ? tile.color : `linear-gradient(${tile.angle}deg, ${tile.from}, ${tile.to})`);
 
   const chosenPattern = heroPatternById(look.poster.pattern.id) ?? HERO_PATTERNS[0];
@@ -225,11 +233,9 @@ function SettingsBody({ path }: { path: string }) {
         <div className="pt-frow">
           <label>Preview</label>
           <span className="pt-tileprev">
-            <span style={{ width: 56, height: 56, borderRadius: 12, background: tileBg(), display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden', fontWeight: 700, fontSize: 15, color: '#fff' }}>
-              {look.icon.kind === 'poster' && isGenerated ? <img src={posterDataUri(look.poster, { noTitle: true })} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                : look.icon.kind === 'poster' && imagePath ? <img src={fileUrl(path, imagePath)} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                : look.icon.kind === 'image' && look.icon.file ? <img src={fileUrl(path, look.icon.file)} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                : initialsOf(name)}
+            <span style={{ position: 'relative', width: 56, height: 56, borderRadius: 12, background: tileBg(), display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden', fontWeight: 700, fontSize: 15, color: '#fff' }}>
+              {tilePreviewSrc ? <img src={tilePreviewSrc} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} /> : <TileLetters text={tileText} />}
+              {tilePreviewSrc && lettersOver ? <TileLetters text={tileText} over color={look.icon.kind === 'poster' && isGenerated ? look.poster.palette.text : undefined} /> : null}
             </span>
             <span style={{ color: 'var(--nim-text-muted)', fontSize: 12 }}>{look.shortName || name}</span>
           </span>
@@ -239,6 +245,10 @@ function SettingsBody({ path }: { path: string }) {
           <input className="pt-input" style={{ width: 200 }} value={look.shortName} placeholder={name} maxLength={24} onChange={(e) => update({ shortName: e.target.value })} />
         </div>
         <div className="pt-frow">
+          <label>Tile letters <Faint>(up to 3; empty uses the initials)</Faint></label>
+          <input className="pt-input" style={{ width: 80 }} value={look.tileLetters} placeholder={initialsOf(name)} maxLength={3} onChange={(e) => update({ tileLetters: e.target.value })} />
+        </div>
+        <div className="pt-frow">
           <label>Tile icon</label>
           <span style={{ display: 'flex', gap: 8, alignItems: 'center', flexWrap: 'wrap' }}>
             <Seg<IconSpec['kind']>
@@ -246,13 +256,19 @@ function SettingsBody({ path }: { path: string }) {
               options={[['initials', 'Initials'], ['poster', 'Poster'], ['image', 'Image']]}
               onChange={(k) => {
                 if (k === 'initials') update({ icon: { kind: 'initials' } });
-                else if (k === 'poster') update({ icon: { kind: 'poster' } });
-                else update({ icon: { kind: 'image', file: look.icon.kind === 'image' ? look.icon.file : '' } });
+                else if (k === 'poster') update({ icon: { kind: 'poster', letters: lettersOver } });
+                else update({ icon: { kind: 'image', file: look.icon.kind === 'image' ? look.icon.file : '', letters: lettersOver } });
               }}
             />
-            {look.icon.kind === 'image' ? <input className="pt-input" style={{ width: 220 }} value={look.icon.file} placeholder=".nimbalyst/icon.png" onChange={(e) => update({ icon: { kind: 'image', file: e.target.value } })} /> : null}
+            {look.icon.kind === 'image' ? <input className="pt-input" style={{ width: 220 }} value={look.icon.file} placeholder=".nimbalyst/icon.png" onChange={(e) => update({ icon: { kind: 'image', file: e.target.value, letters: lettersOver } })} /> : null}
           </span>
         </div>
+        {look.icon.kind !== 'initials' ? (
+          <div className="pt-frow">
+            <label>Letters over the picture <Faint>(the tile letters, centered)</Faint></label>
+            <Toggle on={lettersOver} onChange={(v) => { if (look.icon.kind !== 'initials') update({ icon: { ...look.icon, letters: v } }); }} />
+          </div>
+        ) : null}
         {look.icon.kind === 'initials' ? (
           <div className="pt-frow">
             <label>Tile color</label>

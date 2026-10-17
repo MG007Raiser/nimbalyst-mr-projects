@@ -23,6 +23,10 @@ nav.project-rail.pt-native-hidden { display: none !important; }
 .pt-rail.medium .pt-tile { width: 48px; height: 48px; border-radius: 11px; font-size: 14px; }
 .pt-rail.wide .pt-tile { width: 56px; height: 56px; border-radius: 12px; font-size: 15px; }
 .pt-tile img, .pt-tile svg { width: 100%; height: 100%; object-fit: cover; display: block; }
+.pt-letters { line-height: 1; }
+.pt-letters.one { font-size: 1.6em; font-weight: 800; }
+/* Letters drawn over a poster or image tile. */
+.pt-letters.over { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; color: #fff; text-shadow: 0 1px 4px rgba(0,0,0,.55); pointer-events: none; }
 .pt-tile .pt-emoji { font-size: 20px; line-height: 1; }
 .pt-rail.medium .pt-tile .pt-emoji { font-size: 24px; }
 .pt-rail.wide .pt-tile .pt-emoji { font-size: 28px; }

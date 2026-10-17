@@ -14,7 +14,7 @@ import { useEffect, useMemo, useRef, useState, type CSSProperties, type DragEven
 import { createPortal } from 'react-dom';
 import { posterDataUri, fileUrl } from '../poster';
 import { getBridge, getLook, getLooksCache, getRailLayout, getRailSize, orderedEntries, refreshFromDisk, setRailLayout, setRailProjects, subscribe, type RailProject } from '../store';
-import { entryKey, initialsOf, mergeRailLayout, newId, projectNameOf, type ProjectLook, type RailEntry } from '../types';
+import { entryKey, mergeRailLayout, newId, projectNameOf, tileLettersOf, type ProjectLook, type RailEntry } from '../types';
 
 interface RailItem extends RailProject {
   nativeColor: string;
@@ -82,9 +82,22 @@ function TileContent({ look, item }: { look: ProjectLook | null; item: RailItem 
   // look file (or a file that appears later) is retried without toggling the extension.
   const [brokenSrc, setBrokenSrc] = useState<string | null>(null);
   const src = tileImageSrc(look, item.path);
-  const initials = <span>{initialsOf(item.name)}</span>;
-  if (!src || src === brokenSrc) return initials;
-  return <img src={src} alt="" onError={() => setBrokenSrc(src)} draggable={false} />;
+  const text = tileLettersOf(look, item.name);
+  if (!src || src === brokenSrc) return <TileLetters text={text} />;
+  const icon = look?.icon;
+  const over = icon && icon.kind !== 'initials' && icon.letters;
+  return (
+    <>
+      <img src={src} alt="" onError={() => setBrokenSrc(src)} draggable={false} />
+      {over ? <TileLetters text={text} over color={icon.kind === 'poster' && look.poster.source !== 'image' ? look.poster.palette.text : undefined} /> : null}
+    </>
+  );
+}
+
+/** Tile letters; a single letter is drawn larger. Over a picture they sit on top with a shadow, in the poster's text color when it has one. */
+export function TileLetters({ text, over, color }: { text: string; over?: boolean; color?: string }) {
+  const one = Array.from(text).length === 1;
+  return <span className={`pt-letters${one ? ' one' : ''}${over ? ' over' : ''}`} style={color ? { color } : undefined}>{text}</span>;
 }
 
 type Drop = { key: string; before: boolean } | null;

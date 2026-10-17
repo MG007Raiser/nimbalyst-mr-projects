@@ -9,7 +9,7 @@
  */
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
-import { mergeRailLayout, normalizeLook, type RailEntry } from '../src/types';
+import { mergeRailLayout, normalizeLook, tileLettersOf, type RailEntry } from '../src/types';
 import { fileUrl, isAbsolutePath, posterSvg, resolveProjectPath, wrapTitle } from '../src/poster';
 
 let n = 0;
@@ -49,6 +49,13 @@ assert.equal(v02.poster.palette.text, '#111827'); ok('0.2 file: diagonal-shadow,
 const svg = posterSvg(sample.poster, { title: 'Sandbox', aspect: 'banner' });
 assert.ok(!svg.includes('linearGradient')); assert.ok(svg.includes('fill="#1e293b"')); assert.ok(svg.includes('fill="#ffffff"'));
 assert.ok(svg.includes('viewBox="0 0 400 225"')); ok('banner SVG: no gradient, palette fills, 16:9');
+
+// ---- tile letters: up to three, trimmed, empty falls back to initials; the over-picture flag survives
+assert.equal(sample.tileLetters, ''); assert.equal(tileLettersOf(sample, 'GitHub'), 'GI');
+assert.equal(normalizeLook({ tileLetters: '  G ' }).tileLetters, 'G'); assert.equal(normalizeLook({ tileLetters: 'ABCD' }).tileLetters, 'ABC');
+assert.equal(tileLettersOf(normalizeLook({ tileLetters: 'G' }), 'GitHub'), 'G');
+assert.deepEqual(normalizeLook({ icon: { kind: 'poster', letters: true } }).icon, { kind: 'poster', letters: true });
+assert.deepEqual(normalizeLook({ icon: { kind: 'image', file: 'x.png' } }).icon, { kind: 'image', file: 'x.png', letters: false }); ok('tile letters normalize');
 
 // ---- banner size presets: default large, file value kept, junk falls back; SVG height and title follow the size
 assert.equal(sample.poster.size, 'large'); assert.equal(normalizeLook({ poster: { size: 'medium' } }).poster.size, 'medium');
