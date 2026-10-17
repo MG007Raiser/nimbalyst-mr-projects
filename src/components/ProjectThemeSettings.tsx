@@ -1,13 +1,13 @@
 /**
  * Project Settings › Mr. Projects.
  */
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import type { SettingsPanelProps } from '@nimbalyst/extension-sdk';
-import { HERO_PATTERNS, PALETTES, SHAPES, fileUrl, posterDataUri, posterSvg, randomPalette, resolveProjectPath, samePalette, shapeName } from '../poster';
+import { HERO_PATTERNS, PALETTES, SHAPES, assetFileName, fileUrl, isRemoteUrl, posterDataUri, posterSvg, randomPalette, resolveProjectPath, samePalette, shapeName } from '../poster';
 import { heroPatternById } from '../heroPatterns';
 import {
   deletePalette, getBridge, getExtensionContext, getLook, getRailLayout, getSavedPalettes, getRailSize, openFolderLabel, refreshFromDisk, savePalette, setLookInCache, setRailLayout, setRailSize, subscribe,
-  THEME_EDITOR_ID, toast, writeLookFile, writeProjectFile, type ThemeSummary,
+  downloadProjectAsset, THEME_EDITOR_ID, toast, writeLookFile, writeProjectAsset, writeProjectFile, type ThemeSummary,
 } from '../store';
 import { ensureStyles } from '../styles';
 import { defaultLook, initialsOf, POSTER_SVG_FILE, projectNameOf, tileLettersOf, type BannerSize, type IconSpec, type Palette, type PosterSpec, type ProjectLook, type RailSize, type SavedPalette, type TileSpec } from '../types';
@@ -34,6 +34,24 @@ function ColorField({ value, onChange }: { value: string; onChange: (v: string) 
     <span className="pt-color">
       <input type="color" value={hex} onChange={(e) => onChange(e.target.value)} />
       <input className="pt-input" style={{ width: 96, fontFamily: 'ui-monospace, Menlo, monospace', fontSize: 11.5 }} value={value} onChange={(e) => onChange(e.target.value)} />
+    </span>
+  );
+}
+
+/** An image path or URL, with Browse (copies a picked file into the project) and, for a URL, Save a copy. */
+function ImagePathField({ value, placeholder, width, busy, onChange, onBrowse, onDownload }: {
+  value: string; placeholder: string; width: number; busy: boolean;
+  onChange: (v: string) => void; onBrowse: () => void; onDownload: () => void;
+}) {
+  return (
+    <span style={{ display: 'flex', gap: 8, alignItems: 'center', flexWrap: 'wrap' }}>
+      <input className="pt-input" style={{ width }} value={value} placeholder={placeholder} onChange={(e) => onChange(e.target.value)} />
+      <button type="button" className="pt-btn" disabled={busy} title="Pick an image; it is copied into this project's .nimbalyst folder" onClick={onBrowse}>Browse…</button>
+      {isRemoteUrl(value) ? (
+        <button type="button" className="pt-btn" disabled={busy} title="Download the image into this project's .nimbalyst folder so it works offline and travels with the project" onClick={onDownload}>
+          {busy ? 'Downloading…' : 'Save a copy'}
+        </button>
+      ) : null}
     </span>
   );
 }
@@ -134,10 +152,9 @@ function SettingsBody({ path }: { path: string }) {
         await writeProjectFile(path, POSTER_SVG_FILE, posterSvg(next.poster, { title: next.shortName || name, aspect: 'banner' }));
       } else {
         const rel = imagePath.trim();
-        if (!rel) throw new Error('Choose an image file inside the project first.');
+        if (!rel) throw new Error('Choose an image file or enter an image URL first.');
         const fs = getExtensionContext()?.services.filesystem;
-        const abs = resolveProjectPath(path, rel);
-        if (fs && !(await fs.fileExists(abs))) throw new Error(`No file at ${rel}`);
+        if (fs && !isRemoteUrl(rel) && !(await fs.fileExists(resolveProjectPath(path, rel)))) throw new Error(`No file at ${rel}`);
         next.poster = { ...next.poster, file: rel };
       }
       await writeLookFile(path, next);
@@ -149,6 +166,41 @@ function SettingsBody({ path }: { path: string }) {
       toast('error', `Could not save: ${(e as Error).message}`);
     } finally {
       setSaving(false);
+    }
+  };
+
+  // Browse copies the picked file into .nimbalyst/; a URL can be downloaded there too.
+  // The file inputs stay mounted so picking Image or My image can open the dialog at once.
+  const iconFileRef = useRef<HTMLInputElement>(null);
+  const posterFileRef = useRef<HTMLInputElement>(null);
+  const [importing, setImporting] = useState(false);
+  const setIconFile = (file: string) => update({ icon: { kind: 'image', file, letters: lettersOver } });
+  const setPosterFile = (file: string) => { setImagePath(file); setDirty(true); };
+  const importPicked = async (input: HTMLInputElement, apply: (rel: string) => void) => {
+    const f = input.files?.[0];
+    input.value = '';
+    if (!f) return;
+    setImporting(true);
+    try {
+      const rel = await writeProjectAsset(path, assetFileName(f.name, f.type), new Uint8Array(await f.arrayBuffer()));
+      apply(rel);
+      toast('info', `Copied ${f.name} to ${rel}.`);
+    } catch (e) {
+      toast('error', `Could not copy the image: ${(e as Error).message}`);
+    } finally {
+      setImporting(false);
+    }
+  };
+  const importUrl = async (url: string, apply: (rel: string) => void) => {
+    setImporting(true);
+    try {
+      const rel = await downloadProjectAsset(path, url);
+      apply(rel);
+      toast('info', `Downloaded the image to ${rel}.`);
+    } catch (e) {
+      toast('warning', `Could not download it (${(e as Error).message}). It stays linked from the web: it needs internet and does not travel with the project.`);
+    } finally {
+      setImporting(false);
     }
   };
 
@@ -175,6 +227,8 @@ function SettingsBody({ path }: { path: string }) {
 
   return (
     <div className="pt" style={{ padding: '20px 24px', maxWidth: 900 }} data-testid="project-theme-settings">
+      <input ref={iconFileRef} type="file" accept="image/*" hidden onChange={(e) => void importPicked(e.currentTarget, setIconFile)} />
+      <input ref={posterFileRef} type="file" accept="image/*" hidden onChange={(e) => void importPicked(e.currentTarget, setPosterFile)} />
       <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 12 }}>
         <div>
           <h2>Mr. Projects</h2>
@@ -261,10 +315,24 @@ function SettingsBody({ path }: { path: string }) {
               onChange={(k) => {
                 if (k === 'initials') update({ icon: { kind: 'initials' } });
                 else if (k === 'poster') update({ icon: { kind: 'poster', letters: lettersOver } });
-                else update({ icon: { kind: 'image', file: look.icon.kind === 'image' ? look.icon.file : '', letters: lettersOver } });
+                else {
+                  const file = look.icon.kind === 'image' ? look.icon.file : '';
+                  update({ icon: { kind: 'image', file, letters: lettersOver } });
+                  if (!file) iconFileRef.current?.click();
+                }
               }}
             />
-            {look.icon.kind === 'image' ? <input className="pt-input" style={{ width: 220 }} value={look.icon.file} placeholder=".nimbalyst/icon.png" onChange={(e) => update({ icon: { kind: 'image', file: e.target.value, letters: lettersOver } })} /> : null}
+            {look.icon.kind === 'image' ? (
+              <ImagePathField
+                value={look.icon.file}
+                placeholder=".nimbalyst/icon.png or https://…"
+                width={220}
+                busy={importing}
+                onChange={setIconFile}
+                onBrowse={() => iconFileRef.current?.click()}
+                onDownload={() => { if (look.icon.kind === 'image') void importUrl(look.icon.file, setIconFile); }}
+              />
+            ) : null}
           </span>
         </div>
         {look.icon.kind !== 'initials' ? (
@@ -318,16 +386,24 @@ function SettingsBody({ path }: { path: string }) {
         </div>
         <div className="pt-frow">
           <label>Source</label>
-          <Seg<PosterSpec['source']> value={look.poster.source} options={[['generated', 'Shape'], ['pattern', 'Pattern'], ['image', 'My image']]} onChange={(s) => { updatePoster({ source: s }); setGalleryOpen(false); }} />
+          <Seg<PosterSpec['source']> value={look.poster.source} options={[['generated', 'Shape'], ['pattern', 'Pattern'], ['image', 'My image']]} onChange={(s) => { updatePoster({ source: s }); setGalleryOpen(false); if (s === 'image' && !imagePath.trim()) posterFileRef.current?.click(); }} />
         </div>
 
         {look.poster.source === 'image' ? (
           <>
             <div className="pt-frow">
-              <label>Image file in this project</label>
-              <input className="pt-input" style={{ width: 280 }} value={imagePath} placeholder=".nimbalyst/poster.png" onChange={(e) => { setImagePath(e.target.value); setDirty(true); }} />
+              <label>Image file or URL</label>
+              <ImagePathField
+                value={imagePath}
+                placeholder=".nimbalyst/poster.png or https://…"
+                width={260}
+                busy={importing}
+                onChange={setPosterFile}
+                onBrowse={() => posterFileRef.current?.click()}
+                onDownload={() => void importUrl(imagePath, setPosterFile)}
+              />
             </div>
-            <div className="pt-hint">Drop a PNG, JPG, SVG, WebP, or animated GIF into the project's <code>.nimbalyst/</code> folder, then enter its path above. Wide images suit the banner; GIFs play in the banner and on a poster tile. The file travels with the project.</div>
+            <div className="pt-hint">PNG, JPG, SVG, WebP, or an animated GIF, which plays in the banner and on a poster tile. Browse copies the file into the project's <code>.nimbalyst/</code> folder so it travels with the project. For a web image, paste the image address (not the page address) and use Save a copy; a URL left as is needs internet. Wide images suit the banner.</div>
           </>
         ) : null}
 

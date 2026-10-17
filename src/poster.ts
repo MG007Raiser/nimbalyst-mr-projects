@@ -241,6 +241,39 @@ export function posterAccent(p: Palette): string {
   return p.accent;
 }
 
+/** True for an http(s) URL; image icon and poster paths may be one instead of a project file. */
+export function isRemoteUrl(p: string): boolean {
+  return /^https?:\/\//i.test(p.trim());
+}
+
+const IMAGE_EXT: Record<string, string> = { 'image/gif': 'gif', 'image/png': 'png', 'image/jpeg': 'jpg', 'image/webp': 'webp', 'image/svg+xml': 'svg', 'image/avif': 'avif' };
+
+/**
+ * A safe file name for an image copied into .nimbalyst/, from a picked file's
+ * name or a URL (query and fragment dropped). Adds an extension from the
+ * content type when the name has none.
+ */
+export function assetFileName(source: string, contentType = ''): string {
+  let last = source.trim();
+  if (isRemoteUrl(last)) {
+    try {
+      last = new URL(last).pathname;
+    } catch {
+      /* keep the raw text */
+    }
+  }
+  last = last.split(/[\\/]/).filter(Boolean).pop() ?? '';
+  try {
+    last = decodeURIComponent(last);
+  } catch {
+    /* keep it encoded */
+  }
+  let name = last.replace(/[^A-Za-z0-9._-]+/g, '-').replace(/-+/g, '-').replace(/-\./g, '.').replace(/^[-.]+|-+$/g, '').slice(0, 80) || 'image';
+  const ext = IMAGE_EXT[contentType.split(';')[0].trim().toLowerCase()];
+  if (ext && !/\.[A-Za-z0-9]{2,5}$/.test(name)) name = `${name}.${ext}`;
+  return name;
+}
+
 /** True for POSIX (`/x`), Windows drive (`C:\x`, `C:/x`) and UNC (`\\server\share`) paths. */
 export function isAbsolutePath(p: string): boolean {
   return p.startsWith('/') || p.startsWith('\\\\') || /^[A-Za-z]:[\\/]/.test(p);
@@ -253,11 +286,12 @@ export function resolveProjectPath(projectPath: string, file: string): string {
 }
 
 /**
- * file:// URL for a project file. Handles POSIX paths, Windows drive-letter paths
+ * file:// URL for a project file, or the URL itself when the path is an http(s) URL. Handles POSIX paths, Windows drive-letter paths
  * (`H:\proj\x.svg` -> `file:///H:/proj/x.svg`) and UNC paths (`\\srv\share\x` -> `file://srv/share/x`).
  * A drive-letter path needs a leading slash, otherwise Chromium reads the drive letter as the URL host.
  */
 export function fileUrl(projectPath: string, relative: string): string {
+  if (isRemoteUrl(relative)) return relative.trim();
   const abs = resolveProjectPath(projectPath, relative);
   if (abs.startsWith('//')) return `file:${encodeURI(abs)}`;
   return `file://${encodeURI(abs.startsWith('/') ? abs : `/${abs}`)}`;

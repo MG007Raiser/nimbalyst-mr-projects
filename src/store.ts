@@ -6,7 +6,7 @@
  * does not expose (open a folder, open the Mr. Projects settings screen).
  */
 import type { ExtensionContext } from '@nimbalyst/extension-sdk';
-import { posterSrc } from './poster';
+import { assetFileName, posterSrc } from './poster';
 import { defaultLook, LOOK_FILE, newId, normalizeLayout, normalizeLook, normalizeSavedPalettes, projectNameOf, type Palette, type ProjectLook, type RailEntry, type RailSize, type SavedPalette } from './types';
 
 const NS = 'com.fireworklabs.project-theme';
@@ -179,10 +179,31 @@ export async function writeLookFile(projectPath: string, look: ProjectLook): Pro
   await fs.writeFile(path, JSON.stringify(look, null, 2) + '\n');
 }
 
-export async function writeProjectFile(projectPath: string, relative: string, content: string): Promise<void> {
+export async function writeProjectFile(projectPath: string, relative: string, content: string | Uint8Array): Promise<void> {
   const fs = ctx?.services.filesystem;
   if (!fs) throw new Error('File system access is not available');
   await fs.writeFile(`${projectPath.replace(/\/+$/, '')}/${relative}`, content);
+}
+
+const MAX_ASSET_BYTES = 25 * 1024 * 1024;
+
+/** Write an image into the project's .nimbalyst/ folder; returns its project-relative path. */
+export async function writeProjectAsset(projectPath: string, fileName: string, bytes: Uint8Array): Promise<string> {
+  if (bytes.byteLength > MAX_ASSET_BYTES) throw new Error(`The image is ${(bytes.byteLength / 1048576).toFixed(1)} MB; the limit is 25 MB`);
+  const rel = `.nimbalyst/${fileName}`;
+  await writeProjectFile(projectPath, rel, bytes);
+  return rel;
+}
+
+/** Download an image URL into the project's .nimbalyst/ folder; returns its project-relative path. */
+export async function downloadProjectAsset(projectPath: string, url: string): Promise<string> {
+  const res = await fetch(url.trim());
+  if (!res.ok) throw new Error(`the server answered ${res.status}`);
+  const type = res.headers.get('content-type') ?? '';
+  if (type && !type.toLowerCase().startsWith('image/')) {
+    throw new Error(type.includes('html') ? 'that address is a web page, not an image (copy the image address instead)' : `that address is ${type.split(';')[0]}, not an image`);
+  }
+  return writeProjectAsset(projectPath, assetFileName(url, type), new Uint8Array(await res.arrayBuffer()));
 }
 
 /** Refresh one project's cache entry from its file on disk. */

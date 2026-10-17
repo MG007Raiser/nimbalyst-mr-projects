@@ -10,7 +10,7 @@
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { mergeRailLayout, normalizeLook, tileLettersOf, type RailEntry } from '../src/types';
-import { contrastRatio, fileUrl, isAbsolutePath, PALETTES, posterSvg, randomPalette, resolveProjectPath, wrapTitle } from '../src/poster';
+import { assetFileName, contrastRatio, fileUrl, isAbsolutePath, isRemoteUrl, PALETTES, posterSvg, randomPalette, resolveProjectPath, wrapTitle } from '../src/poster';
 
 let n = 0;
 const ok = (m: string) => { n++; console.log('PASS', m); };
@@ -108,5 +108,16 @@ assert.equal(fileUrl('/Users/me/my proj', 'icon 2.svg'), 'file:///Users/me/my%20
 assert.equal(isAbsolutePath('/x'), true); assert.equal(isAbsolutePath(`C:${BS}x`), true); assert.equal(isAbsolutePath('c:/x'), true);
 assert.equal(isAbsolutePath(`${BS}${BS}srv${BS}x`), true); assert.equal(isAbsolutePath('.nimbalyst/x'), false); assert.equal(isAbsolutePath('x:y'), false);
 assert.equal(resolveProjectPath(`H:${BS}p${BS}`, `a${BS}b.png`), 'H:/p/a/b.png'); ok('isAbsolutePath / resolveProjectPath');
+
+// ---- web images: a URL passes through fileUrl; picked files and URLs become safe .nimbalyst/ names
+assert.equal(isRemoteUrl('https://media.giphy.com/media/abc/giphy.gif'), true); assert.equal(isRemoteUrl(' HTTP://x.y/a.png'), true);
+assert.equal(isRemoteUrl('.nimbalyst/x.gif'), false); assert.equal(isRemoteUrl(`C:${BS}x.gif`), false);
+assert.equal(fileUrl(WIN, 'https://media.giphy.com/media/abc/giphy.gif'), 'https://media.giphy.com/media/abc/giphy.gif');
+assert.equal(assetFileName('https://media.giphy.com/media/abc/giphy.gif?cid=1#x'), 'giphy.gif');
+assert.equal(assetFileName('https://cdn.example.com/img/rocket%20launch.png'), 'rocket-launch.png');
+assert.equal(assetFileName('https://example.com/render?id=7', 'image/webp'), 'render.webp');
+assert.equal(assetFileName('https://example.com/', 'image/gif'), 'image.gif');
+assert.equal(assetFileName(`C:${BS}Users${BS}me${BS}Pictures${BS}My Logo (1).svg`), 'My-Logo-1.svg');
+assert.equal(assetFileName('../../etc/passwd'), 'passwd'); assert.equal(assetFileName('.hidden.png'), 'hidden.png'); ok('isRemoteUrl / assetFileName');
 
 console.log(`\n${n} passed`);
