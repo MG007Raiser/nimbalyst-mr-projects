@@ -323,7 +323,7 @@ function SettingsBody({ path }: { path: string }) {
               <label>Image file in this project</label>
               <input className="pt-input" style={{ width: 280 }} value={imagePath} placeholder=".nimbalyst/poster.png" onChange={(e) => { setImagePath(e.target.value); setDirty(true); }} />
             </div>
-            <div className="pt-hint">Drop a PNG, JPG, SVG, or WebP into the project's <code>.nimbalyst/</code> folder, then enter its path above. Wide images suit the banner. The file travels with the project.</div>
+            <div className="pt-hint">Drop a PNG, JPG, SVG, WebP, or animated GIF into the project's <code>.nimbalyst/</code> folder, then enter its path above. Wide images suit the banner; GIFs play in the banner and on a poster tile. The file travels with the project.</div>
           </>
         ) : null}
 
